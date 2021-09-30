@@ -1,0 +1,24 @@
+Executing the Twist interpreter on 19 benchmarks and parsing outputs.
+Results:
+
+| Paper Benchmark         | Filename                           | Valid | Types | Static | Dynamic |
+| ----------------------- | ---------------------------------- | ----- | ----- | ------ | ------- |
+| Teleport                | `paper/teleport.q`                 |   o   |   o   |   o    |    o    |
+| Teleport-NoCZ           | `paper/teleport-noCZ.q`            |   x   |   o   |   o    |    x    |
+| Teleport-Measure        | `paper/teleport-measure.q`         |   x   |   x   |  N/A   |   N/A   |
+| AndOracle               | `paper/andoracle.q`                |   o   |   o   |   o    |    o    |
+| AndOracle-NotUncomputed | `paper/andoracle-notuncomputed.q`  |   x   |   x   |  N/A   |   N/A   |
+| Bell-GHZ                | `paper/bell-ghz.q`                 |   x   |   x   |  N/A   |   N/A   |
+| Deutsch                 | `paper/deutsch.q`                  |   o   |   o   |   o    |    o    |
+| Deutsch-MissingH        | `paper/deutsch-missingH.q`         |   x   |   o   |   o    |    x    |
+| DeutschJozsa            | `paper/deutschjozsa.q`             |   o   |   o   |   o    |    o    |
+| DeutschJozsa-MixedInit  | `paper/deutschjozsa-mixedinit.q`   |   x   |   o   |   x    |   N/A   |
+| Grover                  | `paper/grover.q`                   |   o   |   o   |   o    |    o    |
+| Grover-BadOracle        | `paper/grover-badoracle.q`         |   x   |   o   |   x    |   N/A   |
+| QFT                     | `paper/qft.q`                      |   o   |   o   |   o    |    o    |
+| ShorCode                | `paper/shorcode.q`                 |   o   |   o   |   o    |    o    |
+| ShorCode-Drop           | `paper/shorcode-drop.q`            |   x   |   x   |  N/A   |   N/A   |
+| ModMul(4)               | `multiply/multiply4.q`             |   o   |   o   |   o    |    o    |
+| ModMul(4)-NotInverse    | `multiply/multiply4-notinverse.q`  |   x   |   o   |   o    |    x    |
+| ModMul(12)              | `multiply/multiply12.q`            |   o   |   o   |   o    |    o    |
+| ModMul(12)-NotInverse   | `multiply/multiply12-notinverse.q` |   x   |   o   |   o    |    x    |

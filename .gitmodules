@@ -1,0 +1,3 @@
+[submodule "qpp"]
+	path = qpp
+	url = git@github.com:softwareQinc/qpp.git

@@ -1,0 +1,14 @@
+(menhir
+  (flags (--explain))
+  (modules parser))
+  
+(ocamllex lexer)
+
+(executable
+ (name main)
+ (libraries core ctypes ctypes.foreign qpp zarith)
+ (ocamlopt_flags -O3 -cclib -fopenmp -cclib -lstdc++ -cclib -Wl,--whole-archive,qpp_stub/libqpp_stubs.a,--no-whole-archive)
+ ; for Clang, replace -Wl,--whole-archive,qpp_stub/libqpp_stubs.a,--no-whole-archive with 
+ ; -force_load qpp_stub/libqpp_stubs.a
+ ; and replace -fopenmp with -lomp
+ (preprocess (pps ppx_deriving.show ppx_deriving.eq ppx_jane)))
