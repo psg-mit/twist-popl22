@@ -8,25 +8,25 @@ if not os.path.exists("./twist"):
     sys.exit(1)
 
 tests = [
-    ("Teleport", "paper/teleport.q"),
-    ("Teleport-NoCZ", "paper/teleport-noCZ.q"),
-    ("Teleport-Measure", "paper/teleport-measure.q"),
-    ("AndOracle", "paper/andoracle.q"),
-    ("AndOracle-NotUncomputed", "paper/andoracle-notuncomputed.q"),
-    ("Bell-GHZ", "paper/bell-ghz.q"),
-    ("Deutsch", "paper/deutsch.q"),
-    ("Deutsch-MissingH", "paper/deutsch-missingH.q"),
-    ("DeutschJozsa", "paper/deutschjozsa.q"),
-    ("DeutschJozsa-MixedInit", "paper/deutschjozsa-mixedinit.q"),
-    ("Grover", "paper/grover.q"),
-    ("Grover-BadOracle", "paper/grover-badoracle.q"),
-    ("QFT", "paper/qft.q"),
-    ("ShorCode", "paper/shorcode.q"),
-    ("ShorCode-Drop", "paper/shorcode-drop.q"),
-    ("ModMul(4)", "multiply/multiply4.q"),
-    ("ModMul(4)-NotInverse", "multiply/multiply4-notinverse.q"),
-    ("ModMul(12)", "multiply/multiply12.q"),
-    ("ModMul(12)-NotInverse", "multiply/multiply12-notinverse.q"),
+    ("Teleport", "paper/teleport.q", True),
+    ("Teleport-NoCZ", "paper/teleport-noCZ.q", False),
+    ("Teleport-Measure", "paper/teleport-measure.q", True),
+    ("AndOracle", "paper/andoracle.q", True),
+    ("AndOracle-NotUncomputed", "paper/andoracle-notuncomputed.q", False),
+    ("Bell-GHZ", "paper/bell-ghz.q", False),
+    ("Deutsch", "paper/deutsch.q", True),
+    ("Deutsch-MissingH", "paper/deutsch-missingH.q", False),
+    ("DeutschJozsa", "paper/deutschjozsa.q", True),
+    ("DeutschJozsa-MixedInit", "paper/deutschjozsa-mixedinit.q", False),
+    ("Grover", "paper/grover.q", True),
+    ("Grover-BadOracle", "paper/grover-badoracle.q", False),
+    ("QFT", "paper/qft.q", True),
+    ("ShorCode", "paper/shorcode.q", True),
+    ("ShorCode-Drop", "paper/shorcode-drop.q", False),
+    ("ModMul(4)", "multiply/multiply4.q", True),
+    ("ModMul(4)-NotInverse", "multiply/multiply4-notinverse.q", False),
+    ("ModMul(12)", "multiply/multiply12.q", True),
+    ("ModMul(12)-NotInverse", "multiply/multiply12-notinverse.q", False),
 ]
 
 print(f'Executing the Twist interpreter on {len(tests)} benchmarks and parsing outputs.')
@@ -34,12 +34,11 @@ print('Results:\n')
 print('| Paper Benchmark         | Filename                           | Valid | Types | Static | Dynamic |')
 print('| ----------------------- | ---------------------------------- | ----- | ----- | ------ | ------- |')
 
-for (name, test) in tests:
+for (name, test, valid) in tests:
     result = subprocess.run(["./twist", "-no_print", "tests/" + test], capture_output=True, text=True).stdout.split("\n")[1:-1]
     types = 'Type checking successful' in result
     static = 'Static analysis successful' in result
     dynamic = 'Program executed successfully.' in result
-    valid = types and static and dynamic
     def fmt(prev, x):
         if x: return ' o '
         elif prev: return ' x '
