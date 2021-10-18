@@ -52,7 +52,7 @@ Because the results of the analysis are the same for each value of _n_, we displ
 | ----------------------- | ---------------------------------- | ----- | ----- | ------ | ------- |
 | Teleport                | `paper/teleport.q`                 |   o   |   o   |   o    |    o    |
 | Teleport-NoCZ           | `paper/teleport-noCZ.q`            |   x   |   o   |   o    |    x    |
-| Teleport-Measure        | `paper/teleport-measure.q`         |   x   |   x   |  N/A   |   N/A   |
+| Teleport-Measure        | `paper/teleport-measure.q`         |   o   |   x   |  N/A   |   N/A   |
 | AndOracle               | `paper/andoracle.q`                |   o   |   o   |   o    |    o    |
 | AndOracle-NotUncomputed | `paper/andoracle-notuncomputed.q`  |   x   |   x   |  N/A   |   N/A   |
 | Bell-GHZ                | `paper/bell-ghz.q`                 |   x   |   x   |  N/A   |   N/A   |
@@ -84,7 +84,7 @@ The artifact is in the `popl22-artifact/` directory inside the home directory of
 $ cd ~/popl22-artifact/
 $ ./twist -help
 The interpreter for the Twist quantum programming language.
-Usage: ./twist <options> [program] 
+Usage: ./twist <options> [program]
 Options are:
   -bench Run in benchmark mode. Outputs timing statistics for 10 runs.
   -no_print Do not print the final quantum state. Useful for large states that would take too long to print.
