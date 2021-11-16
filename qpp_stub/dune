@@ -2,9 +2,9 @@
  (name qpp)
  (libraries ctypes ctypes.foreign)
  (preprocess (pps ppx_deriving.show ppx_deriving.eq ppx_jane))
- (foreign_stubs 
-  (language cxx) 
-  (names stub) 
+ (foreign_stubs
+  (language cxx)
+  (names stub stub_dmat)
   (include_dirs ../qpp/include /usr/include/eigen3)
   (flags :standard -DHAS_OPENMP -O3 -DNDEBUG -DEIGEN_NO_DEBUG -fopenmp -std=c++11))
   ; For Clang, add the -Xclang flag before -fopenmp.

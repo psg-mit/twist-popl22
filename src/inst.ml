@@ -37,5 +37,5 @@ let inst t1 t2 t' lift =
     | Tbool -> Tbool
     | Tunit -> Tunit
   in
-  apply_map map t2
+  apply_map map t2, map
 ;;

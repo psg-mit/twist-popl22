@@ -11,14 +11,14 @@ if not os.path.exists("./twist"):
     print("Error: Please execute `make` to produce the `twist` binary first.")
     sys.exit(1)
 
-if len(sys.argv) != 2:
-    print("Usage: bench.py [max number of qubits]")
+if len(sys.argv) < 2:
+    print("Usage: bench.py [max number of qubits] [-mixed]")
     sys.exit(1)
 
 try:
     N = int(sys.argv[1])
 except ValueError:
-    print("Usage: bench.py [max number of qubits]")
+    print("Usage: bench.py [max number of qubits] [-mixed]")
     sys.exit(1)
 
 if N < 4 or N > 24:
@@ -30,10 +30,12 @@ all_run_time_ste = []
 all_frac = []
 all_frac_err = []
 
+use_mixed = "-mixed" in sys.argv
+
 print("Executing each test for 10 runs.")
 print(" # qubits:          run time           fraction in dynamic check")
 for i in range(4, N + 1):
-    result = subprocess.run(["./twist", "-bench", "tests/multiply/multiply" + str(i) + ".q"], capture_output=True, text=True).stdout.split("\n")[1:-1]
+    result = subprocess.run(["./twist", "-bench"] + (["-mixed"] if use_mixed else []) + ["tests/multiply/multiply" + str(i) + ".q"], capture_output=True, text=True).stdout.split("\n")[1:-1]
     run_times = []
     sep_times = []
     for line in result:

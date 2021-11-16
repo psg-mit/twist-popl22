@@ -11,3 +11,5 @@ val synth
   -> Ast.purity Ast.typ VarMap.t * Ast.purity Ast.typ * Ast.exp
 
 val check : Ast.decl list -> Ast.program
+
+val quick_synth : Ast.exp VarMap.t -> Ast.purity Ast.typ VarMap.t -> Ast.exp -> Ast.purity Ast.typ

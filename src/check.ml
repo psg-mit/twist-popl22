@@ -185,7 +185,7 @@ let synth decls ctx rctx e =
       let ctx, rctx, t2, e2' = synth ctx rctx e2 in
       (match t1 with
       | Tfun (t1', t2') ->
-        let t2' = Inst.inst t1' t2' t2 (fun x -> x) in
+        let t2', _ = Inst.inst t1' t2' t2 (fun x -> x) in
         ctx, rctx, t2', Eapp (e1', e2')
       | _ ->
         raise
@@ -282,8 +282,7 @@ let synth decls ctx rctx e =
       (match t with
       | Tquantum (Ppure, Tepair (t1, t2)) ->
         ctx, rctx, Tpair (Tquantum (Ppure, t1), Tquantum (Ppure, t2)), Esplit (Ppure, e')
-      | Tquantum (_, Tepair (_, _)) ->
-        raise (TypeError "split<P> argument must be pure.")
+      | Tquantum (_, Tepair (_, _)) -> raise (TypeError "split<P> argument must be pure.")
       | _ -> raise (TypeError "Split requires entangled pair argument."))
     | Esplit (_, _) -> raise (TypeError "Split requires mixed or pure annotation.")
     | Ecast (p, e) ->
@@ -364,4 +363,67 @@ let check decls : program =
   in
   let _, (_ : purity typ), e' = synth ctx VarMap.empty e in
   List.rev program, e'
+;;
+
+let rec quick_synth_q = function
+  | Qref _ -> Tqubit
+  | Qepair (q1, q2) ->
+    let t1 = quick_synth_q q1 in
+    let t2 = quick_synth_q q2 in
+    Tepair (t1, t2)
+;;
+
+let rec quick_synth fctx ctx e =
+  (* pp_exp Format.err_formatter e; *)
+  match e with
+  | Evar x ->
+    (match VarMap.find ctx x with
+    | Some t -> t
+    | None ->
+      (match VarMap.find fctx x with
+      | Some e -> quick_synth fctx ctx e
+      | None -> assert false))
+  | Eapp (e1, e2) ->
+    let t1 = quick_synth fctx ctx e1 in
+    let t2 = quick_synth fctx ctx e2 in
+    (match t1 with
+    | Tfun (t1', t2') ->
+      let t, _ = Inst.inst t1' t2' t2 (fun x -> x) in
+      t
+    | _ -> assert false)
+  | Epair (e1, e2) -> Tpair (quick_synth fctx ctx e1, quick_synth fctx ctx e2)
+  | Eunit -> Tunit
+  | Ebool _ -> Tbool
+  | Elam (p, e) ->
+    let t = synth_p p in
+    let ctx' = update_ctx ctx p in
+    let t' = quick_synth fctx ctx' e in
+    Tfun (t, t')
+  | Elet (p, e1, e2) ->
+    let t = quick_synth fctx ctx e1 in
+    let ctx' =
+      try update_ctx ctx p with
+      | TypeError _ ->
+        (match p with
+        | Pinfer key -> VarMap.add_exn (VarMap.remove ctx key) ~key ~data:t
+        | _ -> assert false)
+    in
+    quick_synth fctx ctx' e2
+  | Eqinit -> Tquantum (Ppure, Tqubit)
+  | Eunitary (_, e) -> quick_synth fctx ctx e
+  | Eentangle (p, e) ->
+    (match quick_synth fctx ctx e with
+    | Tpair (Tquantum (_, t1), Tquantum (_, t2)) -> Tquantum (p, Tepair (t1, t2))
+    | _ -> assert false)
+  | Esplit (p, e) ->
+    (match quick_synth fctx ctx e with
+    | Tquantum (_, Tepair (t1, t2)) -> Tpair (Tquantum (p, t1), Tquantum (p, t2))
+    | _ -> assert false)
+  | Ecast (p, e) ->
+    (match quick_synth fctx ctx e with
+    | Tquantum (_, t) -> Tquantum (p, t)
+    | _ -> assert false)
+  | Equantum (p, q) -> Tquantum (p, quick_synth_q q)
+  | Eif (_, e1, _) -> quick_synth fctx ctx e1
+  | Emeasure _ -> Tbool
 ;;

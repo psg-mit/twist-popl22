@@ -2,8 +2,6 @@ open Core
 open Ast
 module VarMap = String.Map
 
-exception SeparabilityError
-
 let rec qubits = function
   | Qref q -> [ q ]
   | Qepair (q1, q2) -> qubits q1 @ qubits q2
@@ -78,7 +76,7 @@ let rec interp ctx state = function
     (match e with
     | Equantum (_, Qepair (q1, q2)) ->
       if not (Sim.separable state (qubits q1) (qubits q2))
-      then raise SeparabilityError
+      then raise Errors.SeparabilityError
       else Epair (Equantum (Ppure, q1), Equantum (Ppure, q2))
     | _ -> assert false)
   | Esplit (_, _) -> assert false

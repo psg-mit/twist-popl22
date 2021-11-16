@@ -38,8 +38,8 @@ program:
 typdecl:
 | TYPE key = IDENT EQUAL data = typ
     { match Hashtbl.add type_aliases ~key ~data with
-      | `Ok -> () 
-      | `Duplicate -> raise (Parse_error.DuplicateTypeAlias key) }
+      | `Ok -> ()
+      | `Duplicate -> raise (Errors.DuplicateTypeAlias key) }
 
 decl:
 | FUN f = IDENT x = patt COLON t = typ EQUAL e = expr
@@ -56,7 +56,7 @@ simple_expr:
 | x = IDENT
     { Evar x }
 (* Unit *)
-| LPAREN RPAREN 
+| LPAREN RPAREN
     { Eunit }
 (* Pair *)
 | LPAREN e1 = expr COMMA e2 = expr RPAREN
@@ -119,16 +119,16 @@ patt:
     { p }
 | LPAREN p1 = patt COMMA p2 = patt RPAREN
     { Ppair (p1, p2) }
-| LPAREN RPAREN 
+| LPAREN RPAREN
     { Punit }
-| x = IDENT COLON t = typ 
+| x = IDENT COLON t = typ
     { Pid (x, t) }
 
 typ:
 | x = IDENT
-    { match Hashtbl.find type_aliases x with 
-      | Some t -> t 
-      | None -> raise (Parse_error.UnknownTypeAlias x) }
+    { match Hashtbl.find type_aliases x with
+      | Some t -> t
+      | None -> raise (Errors.UnknownTypeAlias x) }
 | LPAREN t = typ RPAREN
     { t }
 | BOOLT

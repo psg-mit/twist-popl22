@@ -32,14 +32,7 @@ This claim is evaluated by Step 3 of the section "Validating the Paper's Claims"
 
 The portion of the artifact evaluating this claim is the same as for the first claim. As noted in Section 8.2 (Methodology) of the paper, we compare the results of the analyses on the benchmark programs to Silq, a recent quantum programming language. Because Silq does not support the purity annotations that we extensively utilize, we did not translate the benchmark programs to Silq, and instead reasoned about whether Silq would accept an equivalent program. In the process of evaluating the first claim above, we confirm that Twist accepts the three programs _Teleport_, _Deutsch_, and _ShorCode_ that would be rejected by Silq.
 
-### Differences from Paper Submission
-
-This artifact includes two corrections from the original paper submission. The final version of the paper will include these corrections and be consistent with the artifact.
-
-1. The source of the _DeutschJozsa-MixedInit_ example in Appendix F.10 of the submitted paper was out of date. The correct version is included in this artifact, as `tests/paper/deutschjozsa-mixedinit.q`. The final version of the paper will include this correct version in the appendix.
-2. As pointed out by Reviewer C of the paper, Table 1 of the submitted paper included an error that stated that _Deutsch-MissingH_ failed the static analysis when, in fact, it passes the static analysis and fails the dynamic analysis. The interpreter included in this artifact correctly indicates a runtime error when executed on this test case, `tests/paper/deutsch-missingH.q`. The final version of the paper will correct this error in Table 1.
-
-In addition to the above two corrections, this artifact includes a performance evaluation based on wall-clock execution timings, which will differ from the graph in Figure 13 of the submitted paper. As discussed in Section 8.2 (Methodology), our original hardware configuration was a MacBook Pro with 2.4GHz 8-Core Intel Core i9 processor and 64 GB of RAM with OpenMP enabled. The virtual machine may execute under significantly limited hardware specifications. We expect that running the quantum simulator in a virtual machine with fewer CPU cores, less physical RAM, and virtualization overhead compared to our original configuration will result in slower execution. In particular, the test cases on >20 qubits may take unreasonably long to execute in the VM.
+This artifact includes a performance evaluation based on wall-clock execution timings, which will differ from the graph in the submitted paper. As discussed in Section 8.2 (Methodology), our original hardware configuration was a MacBook Pro with 2.4GHz 8-Core Intel Core i9 processor and 64 GB of RAM with OpenMP enabled. The virtual machine may execute under significantly limited hardware specifications. We expect that running the quantum simulator in a virtual machine with fewer CPU cores, less physical RAM, and virtualization overhead compared to our original configuration will result in slower execution. In particular, the test cases on >20 qubits may take unreasonably long to execute in the VM.
 
 ### Benchmarks Included in Artifact
 
@@ -47,21 +40,22 @@ The artifact includes the following benchmarks in the `tests/` directory. First,
 
 The following table, adapted from Table 1 of the paper, depicts the expected results of the Twist analyses on each program.
 Because the results of the analysis are the same for each value of _n_, we display only the cases for _n_ = 4 and 12 in the table.
+The entries with `*` indicate that the pure-simulator was not executed, and the result of the mixed-state simulator is shown.
 
 | Paper Benchmark         | Filename                           | Valid | Types | Static | Dynamic |
 | ----------------------- | ---------------------------------- | ----- | ----- | ------ | ------- |
 | Teleport                | `paper/teleport.q`                 |   o   |   o   |   o    |    o    |
 | Teleport-NoCZ           | `paper/teleport-noCZ.q`            |   x   |   o   |   o    |    x    |
-| Teleport-Measure        | `paper/teleport-measure.q`         |   o   |   x   |  N/A   |   N/A   |
+| Teleport-Measure        | `paper/teleport-measure.q`         |   o   |   o   |   x    |    o*   |
 | AndOracle               | `paper/andoracle.q`                |   o   |   o   |   o    |    o    |
 | AndOracle-NotUncomputed | `paper/andoracle-notuncomputed.q`  |   x   |   x   |  N/A   |   N/A   |
 | Bell-GHZ                | `paper/bell-ghz.q`                 |   x   |   x   |  N/A   |   N/A   |
 | Deutsch                 | `paper/deutsch.q`                  |   o   |   o   |   o    |    o    |
 | Deutsch-MissingH        | `paper/deutsch-missingH.q`         |   x   |   o   |   o    |    x    |
 | DeutschJozsa            | `paper/deutschjozsa.q`             |   o   |   o   |   o    |    o    |
-| DeutschJozsa-MixedInit  | `paper/deutschjozsa-mixedinit.q`   |   x   |   o   |   x    |   N/A   |
+| DeutschJozsa-MixedInit  | `paper/deutschjozsa-mixedinit.q`   |   x   |   o   |   x    |    x*   |
 | Grover                  | `paper/grover.q`                   |   o   |   o   |   o    |    o    |
-| Grover-BadOracle        | `paper/grover-badoracle.q`         |   x   |   o   |   x    |   N/A   |
+| Grover-BadOracle        | `paper/grover-badoracle.q`         |   x   |   o   |   x    |    x*   |
 | QFT                     | `paper/qft.q`                      |   o   |   o   |   o    |    o    |
 | ShorCode                | `paper/shorcode.q`                 |   o   |   o   |   o    |    o    |
 | ShorCode-Drop           | `paper/shorcode-drop.q`            |   x   |   x   |  N/A   |   N/A   |
@@ -90,8 +84,9 @@ Options are:
   -no_print Do not print the final quantum state. Useful for large states that would take too long to print.
   -no_sim Do not run the quantum simulator to interpret the program. The interpreter will exit after static analyses.
   -no_dynamic Advanced: do not execute dynamic checks. The program will continue to execute in an unsafe manner.
-  -no_static Advanced: do not execute the static analysis. The program will execute in an unsafe manner.
+  -ignore_static Advanced: ignore the static analysis. The program will execute in an unsafe manner.
   -no_convert Advanced: do not attempt to automatically infer conversion operators. Programs that utilize this feature will be rejected.
+  -mixed Use the mixed-state simulator.
   -help  Display this list of options
   --help  Display this list of options
 ```
@@ -133,6 +128,8 @@ evince bench.pdf
 To evaluate the claim, compare the two plots in `bench.pdf` to Figure 13 of the paper.
 We expect the output of the script to be similar to Figure 13. First, the total execution time of the benchmark programs should increase exponentially with the number of qubits. Furthermore, despite hardware differences, we expect the relative overhead of the runtime check to remain below 5%. This overhead may appear higher than the 3.5% claimed in the paper, because the relative overhead is larger on the smaller test cases that are more vulnerable to noise and sensitive to machine specifications.
 A saved copy of the output of `./bench.py 20` is stored in the files `bench.out` and `bench.out.pdf`. Note that the larger tests may take a significant time to execute on the VM. For example, `./bench.py 20` took about 18 minutes to execute for us.
+
+The scripts `check.py` and `bench.py` accept an additional optional argument `-mixed` which if present will cause the interpreter to use the mixed-state simulator rather than the pure-state simulator.
 
 ## Reusability: Writing Twist Programs
 

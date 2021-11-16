@@ -114,7 +114,8 @@ let rec synth decls ctx = function
       | _ -> assert false
     in
     let t' = synth decls ctx e2 in
-    Inst.inst t1 t2 t' Purity.lift
+    let t, _ = Inst.inst t1 t2 t' Purity.lift in
+    t
   | Eapp (e1, e2) ->
     let t1 = synth decls ctx e1 in
     let (_ : Purity.purity typ) = synth decls ctx e2 in

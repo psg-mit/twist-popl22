@@ -25,10 +25,10 @@ let parse parsing_fun lexing_fun source_name =
   | Parser.Error ->
     In_channel.close ic;
     raise (Error (sprintf "%a: Syntax error.\n" print_position lexbuf))
-  | Parse_error.UnknownTypeAlias x ->
+  | Errors.UnknownTypeAlias x ->
     In_channel.close ic;
     raise (Error (sprintf "%a: Unknown type alias %s.\n" print_position lexbuf x))
-  | Parse_error.NoEntryPoint ->
+  | Errors.NoEntryPoint ->
     In_channel.close ic;
     raise
       (Error
@@ -36,7 +36,7 @@ let parse parsing_fun lexing_fun source_name =
             "%a: Program does not terminate in an entry point return declaration.\n"
             print_position
             lexbuf))
-  | Parse_error.DuplicateTypeAlias x ->
+  | Errors.DuplicateTypeAlias x ->
     In_channel.close ic;
     raise (Error (sprintf "%a: Cannot redefine type alias %s.\n" print_position lexbuf x))
 ;;
@@ -51,19 +51,18 @@ let run_file file =
     | Check.TypeError s -> raise (Error (sprintf "Type error: %s\n" s))
   in
   if not !Args.bench then Printf.printf "Type checking successful\n%!";
-  if not !Args.no_static
-  then (
-    try Static.check p with
-    | Static.Error s -> raise (Error (sprintf "Static analysis error: %s\n" s)));
-  if not !Args.bench then Printf.printf "Static analysis successful\n%!";
+  (try Static.check p with
+  | Static.Error s ->
+    if (not !Args.no_static) && not !Args.bench
+    then raise (Error (sprintf "Static analysis error: %s\n" s)));
+  if (not !Args.bench) && not !Args.no_static
+  then Printf.printf "Static analysis successful\n%!";
   let static_end = Unix.gettimeofday () in
-  if !Args.sim
-  then (
-    if not !Args.bench then Printf.printf "Executing program\n%!";
+  let exec interp with_state print =
     let sim state =
       let e =
-        try Interp.interp p state with
-        | Interp.SeparabilityError ->
+        try interp p state with
+        | Errors.SeparabilityError ->
           raise (Error "Runtime error: Failed runtime separability condition.\n")
       in
       if !Args.no_print
@@ -71,13 +70,20 @@ let run_file file =
       else (
         Format.printf "Final result: %a\n%!" Ast.pp_exp e;
         Format.printf "Quantum state:\n%!";
-        Sim.print state)
+        print state)
     in
-    let sep_time = Sim.with_state sim in
+    let sep_time = with_state sim in
     let run_end = Unix.gettimeofday () in
     let static_time = static_end -. start in
     let run_time = run_end -. static_end in
-    Some (run_time, static_time, sep_time))
+    Some (run_time, static_time, sep_time)
+  in
+  if !Args.sim
+  then (
+    if not !Args.bench then Printf.printf "Executing program\n%!";
+    if !Args.mixed
+    then exec Interp_dmat.interp Sim_dmat.with_state Sim_dmat.print
+    else exec Interp.interp Sim.with_state Sim.print)
   else None
 ;;
 

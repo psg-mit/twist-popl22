@@ -34,13 +34,15 @@ print('Results:\n')
 print('| Paper Benchmark         | Filename                           | Valid | Types | Static | Dynamic |')
 print('| ----------------------- | ---------------------------------- | ----- | ----- | ------ | ------- |')
 
+use_mixed = "-mixed" in sys.argv
+
 for (name, test, valid) in tests:
-    result = subprocess.run(["./twist", "-no_print", "tests/" + test], capture_output=True, text=True).stdout.split("\n")[1:-1]
+    result = subprocess.run(["./twist"] + (["-ignore_static", "-mixed"] if use_mixed else []) + ["-no_print", "tests/" + test], capture_output=True, text=True).stdout.split("\n")[1:-1]
     types = 'Type checking successful' in result
-    static = 'Static analysis successful' in result
+    static = 'Static analysis successful' in result if not use_mixed else True
     dynamic = 'Program executed successfully.' in result
     def fmt(prev, x):
         if x: return ' o '
         elif prev: return ' x '
         else: return 'N/A'
-    print(f'| {name:23} | {"`" + test + "`":34} | {" " + fmt(True, valid) + " "} | {" " + fmt(True, types) + " "} | {" " + fmt(types, static) + "  "} | {"  " + fmt(types and static, dynamic) + "  "} |')
+    print(f'| {name:23} | {"`" + test + "`":34} | {" " + fmt(True, valid) + " "} | {" " + fmt(True, types) + " "} | {" " + ("N/A" if use_mixed else fmt(types, static)) + "  "} | {"  " + fmt(types if use_mixed else types and static, dynamic) + "  "} |')
